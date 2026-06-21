@@ -342,7 +342,7 @@
                 </div>
                 <h3 class="font-serif text-2xl text-emerald-950 font-semibold mb-2">¡Asistencia Registrada!</h3>
                 <p id="thankYouDetails" class="text-gray-600 text-sm leading-relaxed mb-6"></p>
-                <button onclick="resetForm()" class="text-xs text-emerald-800 underline font-semibold">Registrar otra respuesta</button>
+                <button id="resetFormBtn" type="button" class="text-xs text-emerald-800 underline font-semibold">Registrar otra respuesta</button>
             </div>
         </div>
     </section>
@@ -355,7 +355,7 @@
             <p class="text-xs text-emerald-300/50">&copy; 2027 • Mérida, Yucatán • Hecho con amor</p>
             
             <!-- Botón discreto de administración (Icono de Candado) -->
-            <button onclick="openAdminModal()" class="absolute right-2 bottom-0 text-emerald-800 hover:text-emerald-500 text-xs p-2 transition-colors" title="Panel de Organizadores">
+            <button id="openAdminBtn" type="button" class="absolute right-2 bottom-0 text-emerald-800 hover:text-emerald-500 text-xs p-2 transition-colors" title="Panel de Organizadores">
                 <i class="fas fa-lock"></i>
             </button>
         </div>
@@ -364,7 +364,7 @@
     <!-- MODAL DE ACCESO AL PANEL DE ADMINISTRACIÓN -->
     <div id="adminAuthModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-gray-800 p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl relative">
-            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
+            <button id="closeAdminAuthBtn" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
                 <i class="fas fa-times"></i>
             </button>
             <div class="text-center mb-6">
@@ -380,7 +380,7 @@
                     <input type="password" id="adminPassword" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Pista: boda">
                 </div>
                 <p id="authError" class="text-red-600 text-xs hidden">Clave incorrecta. Inténtalo de nuevo.</p>
-                <button onclick="verifyAdminPassword()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 rounded-xl transition-all">
+                <button id="submitAuthBtn" type="button" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 rounded-xl transition-all">
                     Acceder al Reporte
                 </button>
             </div>
@@ -398,10 +398,10 @@
                     <p class="text-emerald-200 text-sm">Control en tiempo real • Mariela &amp; Jesús</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <button onclick="exportToCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
+                    <button id="exportCsvBtn" type="button" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
                         <i class="fas fa-file-excel"></i> Descargar Excel (CSV)
                     </button>
-                    <button onclick="closeAdminDashboard()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
+                    <button id="closeDashboardBtn" type="button" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
                         <i class="fas fa-door-open"></i> Salir del Panel
                     </button>
                 </div>
@@ -474,7 +474,7 @@
 
         // Configuración de Firebase - Base de datos unificada en la nube para vuestra invitación
         const firebaseConfig = {
-            apiKey: "", // La clave de API se inyecta automáticamente en producción por el entorno o la reemplazas tú
+            apiKey: "", 
             authDomain: "wedding-mariela-jesus.firebaseapp.com",
             projectId: "wedding-mariela-jesus",
             storageBucket: "wedding-mariela-jesus.appspot.com",
@@ -642,33 +642,61 @@
         });
 
         // ============================================
-        // CONTROL DEL PANEL DE REPORTES (ADMIN) - EXPOSICIÓN GLOBAL PARA "onclick"
+        // CONTROL ASÍNCRONO DEL PANEL DE REPORTES (ADMIN)
         // ============================================
-        
-        window.openAdminModal = function() {
-            document.getElementById("adminAuthModal").classList.remove("hidden");
-            document.getElementById("adminPassword").focus();
-        };
 
-        window.closeAdminAuthModal = function() {
+        // 1. Vincular clics de apertura y cierre de paneles usando Event Listeners internos (Evita el error HTML onclick)
+        const openAdminBtn = document.getElementById("openAdminBtn");
+        const closeAdminAuthBtn = document.getElementById("closeAdminAuthBtn");
+        const submitAuthBtn = document.getElementById("submitAuthBtn");
+        const closeDashboardBtn = document.getElementById("closeDashboardBtn");
+        const exportCsvBtn = document.getElementById("exportCsvBtn");
+        const resetFormBtn = document.getElementById("resetFormBtn");
+
+        if (openAdminBtn) {
+            openAdminBtn.addEventListener("click", () => {
+                document.getElementById("adminAuthModal").classList.remove("hidden");
+                document.getElementById("adminPassword").focus();
+            });
+        }
+
+        if (closeAdminAuthBtn) {
+            closeAdminAuthBtn.addEventListener("click", closeAdminAuthModal);
+        }
+
+        if (submitAuthBtn) {
+            submitAuthBtn.addEventListener("click", verifyAdminPassword);
+        }
+
+        if (closeDashboardBtn) {
+            closeDashboardBtn.addEventListener("click", () => {
+                document.getElementById("adminDashboardModal").classList.add("hidden");
+            });
+        }
+
+        if (exportCsvBtn) {
+            exportCsvBtn.addEventListener("click", exportToCSV);
+        }
+
+        if (resetFormBtn) {
+            resetFormBtn.addEventListener("click", resetForm);
+        }
+
+        function closeAdminAuthModal() {
             document.getElementById("adminAuthModal").classList.add("hidden");
             document.getElementById("adminPassword").value = "";
             document.getElementById("authError").classList.add("hidden");
-        };
+        }
 
-        window.verifyAdminPassword = function() {
+        function verifyAdminPassword() {
             const pass = document.getElementById("adminPassword").value;
             if (pass.toLowerCase() === "boda") {
-                window.closeAdminAuthModal();
+                closeAdminAuthModal();
                 showAdminDashboard();
             } else {
                 document.getElementById("authError").classList.remove("hidden");
             }
-        };
-
-        window.closeAdminDashboard = function() {
-            document.getElementById("adminDashboardModal").classList.add("hidden");
-        };
+        }
 
         function showAdminDashboard() {
             document.getElementById("adminDashboardModal").classList.remove("hidden");
@@ -708,6 +736,8 @@
 
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-gray-50 transition-colors";
+                
+                // Creación de elementos con escuchadores individuales para eliminar (Evita fallos por inyección dinámica)
                 tr.innerHTML = `
                     <td class="p-4 font-semibold text-gray-900">${item.name}</td>
                     <td class="p-4 text-center font-medium">${item.companions}</td>
@@ -728,12 +758,20 @@
                     </td>
                     <td class="p-4 text-xs text-gray-600 max-w-xs truncate" title="${item.notes}">${item.notes}</td>
                     <td class="p-4 text-center">
-                        <button onclick="deleteGuestRecord('${item.id}')" class="text-red-600 hover:text-red-900" title="Eliminar de la lista">
+                        <button id="delBtn-${item.id}" type="button" class="text-red-600 hover:text-red-900" title="Eliminar de la lista">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
                 `;
                 tableBody.appendChild(tr);
+
+                // Asignar el evento click al botón de eliminar generado dinámicamente
+                const specificDelBtn = document.getElementById(`delBtn-${item.id}`);
+                if (specificDelBtn) {
+                    specificDelBtn.addEventListener("click", () => {
+                        deleteGuestRecord(item.id);
+                    });
+                }
             });
 
             document.getElementById("statTotal").innerText = totalGuests;
@@ -742,8 +780,8 @@
             document.getElementById("statSun").innerText = sundayCount;
         }
 
-        // Eliminar confirmaciones directamente de la nube expuesta al entorno global
-        window.deleteGuestRecord = async function(id) {
+        // Eliminar confirmaciones directamente de la nube
+        async function deleteGuestRecord(id) {
             const confirmAction = confirm("¿Estás seguro de que deseas eliminar este registro de confirmación de forma permanente?");
             if (confirmAction) {
                 try {
@@ -755,10 +793,10 @@
                     showToast("No se pudo eliminar el registro. Inténtalo más tarde.");
                 }
             }
-        };
+        }
 
         // Exportar a Excel (CSV)
-        window.exportToCSV = function() {
+        function exportToCSV() {
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Nombre de Invitado,Acompanantes,Asiste Viernes,Asiste Sabado,Asiste Domingo,Notas\n";
             
@@ -776,19 +814,19 @@
             link.click();
             document.body.removeChild(link);
             showToast("Descargando reporte de asistencia...");
-        };
+        }
 
         // Resetear Formulario
-        window.resetForm = function() {
+        function resetForm() {
             rsvpForm.reset();
             rsvpForm.classList.remove("hidden");
             thankYouMsg.classList.add("hidden");
-        };
+        }
 
         // Permitir entrar con "Enter" en el campo contraseña
         document.getElementById("adminPassword").addEventListener("keyup", function(event) {
             if (event.key === "Enter") {
-                window.verifyAdminPassword();
+                verifyAdminPassword();
             }
         });
     </script>

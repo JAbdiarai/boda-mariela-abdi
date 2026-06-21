@@ -342,7 +342,7 @@
                 </div>
                 <h3 class="font-serif text-2xl text-emerald-950 font-semibold mb-2">¡Asistencia Registrada!</h3>
                 <p id="thankYouDetails" class="text-gray-600 text-sm leading-relaxed mb-6"></p>
-                <button id="resetFormBtn" type="button" class="text-xs text-emerald-800 underline font-semibold">Registrar otra respuesta</button>
+                <button onclick="resetForm()" class="text-xs text-emerald-800 underline font-semibold">Registrar otra respuesta</button>
             </div>
         </div>
     </section>
@@ -355,7 +355,7 @@
             <p class="text-xs text-emerald-300/50">&copy; 2027 • Mérida, Yucatán • Hecho con amor</p>
             
             <!-- Botón discreto de administración (Icono de Candado) -->
-            <button id="openAdminBtn" type="button" class="absolute right-2 bottom-0 text-emerald-800 hover:text-emerald-500 text-xs p-2 transition-colors" title="Panel de Organizadores">
+            <button onclick="openAdminModal()" class="absolute right-2 bottom-0 text-emerald-800 hover:text-emerald-500 text-xs p-2 transition-colors" title="Panel de Organizadores">
                 <i class="fas fa-lock"></i>
             </button>
         </div>
@@ -364,7 +364,7 @@
     <!-- MODAL DE ACCESO AL PANEL DE ADMINISTRACIÓN -->
     <div id="adminAuthModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white text-gray-800 p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl relative">
-            <button id="closeAdminAuthBtn" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
                 <i class="fas fa-times"></i>
             </button>
             <div class="text-center mb-6">
@@ -380,7 +380,7 @@
                     <input type="password" id="adminPassword" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Pista: boda">
                 </div>
                 <p id="authError" class="text-red-600 text-xs hidden">Clave incorrecta. Inténtalo de nuevo.</p>
-                <button id="submitAuthBtn" type="button" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 rounded-xl transition-all">
+                <button onclick="verifyAdminPassword()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 rounded-xl transition-all">
                     Acceder al Reporte
                 </button>
             </div>
@@ -398,10 +398,10 @@
                     <p class="text-emerald-200 text-sm">Control en tiempo real • Mariela &amp; Jesús</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <button id="exportCsvBtn" type="button" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
+                    <button onclick="exportToCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
                         <i class="fas fa-file-excel"></i> Descargar Excel (CSV)
                     </button>
-                    <button id="closeDashboardBtn" type="button" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
+                    <button onclick="closeAdminDashboard()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
                         <i class="fas fa-door-open"></i> Salir del Panel
                     </button>
                 </div>
@@ -474,7 +474,7 @@
 
         // Configuración de Firebase - Base de datos unificada en la nube para vuestra invitación
         const firebaseConfig = {
-            apiKey: "", 
+            apiKey: "", // REEMPLAZAR con tu API key de Firebase Console
             authDomain: "wedding-mariela-jesus.firebaseapp.com",
             projectId: "wedding-mariela-jesus",
             storageBucket: "wedding-mariela-jesus.appspot.com",
@@ -482,51 +482,58 @@
             appId: "1:303259823522:web:75734273dfec8cf2df1203"
         };
 
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Identificador del proyecto para aislar tus colecciones (Siguiendo Regla 1 de Firestore)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
-        const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'confirmaciones');
-
-        // Estado del usuario autenticado
+        // Estado global
         let currentUser = null;
         let guestsList = [];
+        let db = null;
+        let collectionRef = null;
+        let firebaseReady = false;
 
-        // Conectar e iniciar sesión anónima de forma segura (Siguiendo Regla 3 de Firestore)
-        const initFirebaseSession = async () => {
-            try {
-                await signInAnonymously(auth);
-            } catch (error) {
-                console.error("Error al autenticar sesión de Firebase:", error);
-            }
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                // Escuchar datos en tiempo real de forma segura y actualizar dashboard
-                onSnapshot(collectionRef, (snapshot) => {
-                    guestsList = [];
-                    snapshot.forEach((doc) => {
-                        guestsList.push({ id: doc.id, ...doc.data() });
-                    });
-                    // Si el dashboard está abierto, refrescar su vista
-                    if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
-                        renderDashboard();
-                    }
-                }, (error) => {
-                    console.error("Error al leer confirmaciones en tiempo real:", error);
-                });
+        // Inicializar Firebase con manejo de errores
+        try {
+            if (!firebaseConfig.apiKey) {
+                console.warn("Firebase API key no configurada. La funcionalidad de base de datos está deshabilitada.");
             } else {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                db = getFirestore(app);
+
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
+                collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'confirmaciones');
+                firebaseReady = true;
+
+                const initFirebaseSession = async () => {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (error) {
+                        console.error("Error al autenticar sesión de Firebase:", error);
+                    }
+                };
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        currentUser = user;
+                        onSnapshot(collectionRef, (snapshot) => {
+                            guestsList = [];
+                            snapshot.forEach((d) => {
+                                guestsList.push({ id: d.id, ...d.data() });
+                            });
+                            if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
+                                renderDashboard();
+                            }
+                        }, (error) => {
+                            console.error("Error al leer confirmaciones en tiempo real:", error);
+                        });
+                    } else {
+                        initFirebaseSession();
+                    }
+                });
+
                 initFirebaseSession();
             }
-        });
-
-        // Inicializar sesión inmediatamente al cargar
-        initFirebaseSession();
+        } catch (error) {
+            console.error("Error al inicializar Firebase:", error);
+        }
 
         // ============================================
         // CUENTA REGRESIVA
@@ -604,6 +611,10 @@
             const notes = document.getElementById("notes").value;
 
             try {
+                if (!firebaseReady || !collectionRef) {
+                    throw new Error("Base de datos no disponible. Configura el API key de Firebase.");
+                }
+
                 await addDoc(collectionRef, {
                     name: guestName,
                     fri: attendFri,
@@ -642,61 +653,33 @@
         });
 
         // ============================================
-        // CONTROL ASÍNCRONO DEL PANEL DE REPORTES (ADMIN)
+        // CONTROL DEL PANEL DE REPORTES (ADMIN) - EXPOSICIÓN GLOBAL PARA "onclick"
         // ============================================
+        
+        window.openAdminModal = function() {
+            document.getElementById("adminAuthModal").classList.remove("hidden");
+            document.getElementById("adminPassword").focus();
+        };
 
-        // 1. Vincular clics de apertura y cierre de paneles usando Event Listeners internos (Evita el error HTML onclick)
-        const openAdminBtn = document.getElementById("openAdminBtn");
-        const closeAdminAuthBtn = document.getElementById("closeAdminAuthBtn");
-        const submitAuthBtn = document.getElementById("submitAuthBtn");
-        const closeDashboardBtn = document.getElementById("closeDashboardBtn");
-        const exportCsvBtn = document.getElementById("exportCsvBtn");
-        const resetFormBtn = document.getElementById("resetFormBtn");
-
-        if (openAdminBtn) {
-            openAdminBtn.addEventListener("click", () => {
-                document.getElementById("adminAuthModal").classList.remove("hidden");
-                document.getElementById("adminPassword").focus();
-            });
-        }
-
-        if (closeAdminAuthBtn) {
-            closeAdminAuthBtn.addEventListener("click", closeAdminAuthModal);
-        }
-
-        if (submitAuthBtn) {
-            submitAuthBtn.addEventListener("click", verifyAdminPassword);
-        }
-
-        if (closeDashboardBtn) {
-            closeDashboardBtn.addEventListener("click", () => {
-                document.getElementById("adminDashboardModal").classList.add("hidden");
-            });
-        }
-
-        if (exportCsvBtn) {
-            exportCsvBtn.addEventListener("click", exportToCSV);
-        }
-
-        if (resetFormBtn) {
-            resetFormBtn.addEventListener("click", resetForm);
-        }
-
-        function closeAdminAuthModal() {
+        window.closeAdminAuthModal = function() {
             document.getElementById("adminAuthModal").classList.add("hidden");
             document.getElementById("adminPassword").value = "";
             document.getElementById("authError").classList.add("hidden");
-        }
+        };
 
-        function verifyAdminPassword() {
+        window.verifyAdminPassword = function() {
             const pass = document.getElementById("adminPassword").value;
             if (pass.toLowerCase() === "boda") {
-                closeAdminAuthModal();
+                window.closeAdminAuthModal();
                 showAdminDashboard();
             } else {
                 document.getElementById("authError").classList.remove("hidden");
             }
-        }
+        };
+
+        window.closeAdminDashboard = function() {
+            document.getElementById("adminDashboardModal").classList.add("hidden");
+        };
 
         function showAdminDashboard() {
             document.getElementById("adminDashboardModal").classList.remove("hidden");
@@ -736,8 +719,6 @@
 
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-gray-50 transition-colors";
-                
-                // Creación de elementos con escuchadores individuales para eliminar (Evita fallos por inyección dinámica)
                 tr.innerHTML = `
                     <td class="p-4 font-semibold text-gray-900">${item.name}</td>
                     <td class="p-4 text-center font-medium">${item.companions}</td>
@@ -758,20 +739,12 @@
                     </td>
                     <td class="p-4 text-xs text-gray-600 max-w-xs truncate" title="${item.notes}">${item.notes}</td>
                     <td class="p-4 text-center">
-                        <button id="delBtn-${item.id}" type="button" class="text-red-600 hover:text-red-900" title="Eliminar de la lista">
+                        <button onclick="deleteGuestRecord('${item.id}')" class="text-red-600 hover:text-red-900" title="Eliminar de la lista">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
                 `;
                 tableBody.appendChild(tr);
-
-                // Asignar el evento click al botón de eliminar generado dinámicamente
-                const specificDelBtn = document.getElementById(`delBtn-${item.id}`);
-                if (specificDelBtn) {
-                    specificDelBtn.addEventListener("click", () => {
-                        deleteGuestRecord(item.id);
-                    });
-                }
             });
 
             document.getElementById("statTotal").innerText = totalGuests;
@@ -780,12 +753,16 @@
             document.getElementById("statSun").innerText = sundayCount;
         }
 
-        // Eliminar confirmaciones directamente de la nube
-        async function deleteGuestRecord(id) {
+        window.deleteGuestRecord = async function(id) {
+            if (!firebaseReady || !db) {
+                showToast("Base de datos no disponible.");
+                return;
+            }
             const confirmAction = confirm("¿Estás seguro de que deseas eliminar este registro de confirmación de forma permanente?");
             if (confirmAction) {
                 try {
-                    const docToDel = doc(db, 'artifacts', appId, 'public', 'data', 'confirmaciones', id);
+                    const appIdVal = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
+                    const docToDel = doc(db, 'artifacts', appIdVal, 'public', 'data', 'confirmaciones', id);
                     await deleteDoc(docToDel);
                     showToast("Registro eliminado con éxito.");
                 } catch (error) {
@@ -793,10 +770,10 @@
                     showToast("No se pudo eliminar el registro. Inténtalo más tarde.");
                 }
             }
-        }
+        };
 
         // Exportar a Excel (CSV)
-        function exportToCSV() {
+        window.exportToCSV = function() {
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Nombre de Invitado,Acompanantes,Asiste Viernes,Asiste Sabado,Asiste Domingo,Notas\n";
             
@@ -814,19 +791,19 @@
             link.click();
             document.body.removeChild(link);
             showToast("Descargando reporte de asistencia...");
-        }
+        };
 
         // Resetear Formulario
-        function resetForm() {
+        window.resetForm = function() {
             rsvpForm.reset();
             rsvpForm.classList.remove("hidden");
             thankYouMsg.classList.add("hidden");
-        }
+        };
 
         // Permitir entrar con "Enter" en el campo contraseña
         document.getElementById("adminPassword").addEventListener("keyup", function(event) {
             if (event.key === "Enter") {
-                verifyAdminPassword();
+                window.verifyAdminPassword();
             }
         });
     </script>

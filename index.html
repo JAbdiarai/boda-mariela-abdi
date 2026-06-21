@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boda de Mariela & Jesús - 19 de Marzo, 2027</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Módulos de Firebase para base de datos en la nube en tiempo real -->
+    <script type="importmap">
+      {
+        "imports": {
+          "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+          "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+          "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+        }
+      }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f7f5f0;
+            color: #2c3e35;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .hero-bg {
+            background-image: linear-gradient(rgba(44, 62, 53, 0.45), rgba(44, 62, 53, 0.65)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1200');
+            background-size: cover;
+            background-position: center;
+        }
+        .leaf-decor {
+            opacity: 0.15;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-emerald-800 selection:text-white">
+
+    <!-- Música de fondo interactiva -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button id="musicToggle" class="bg-emerald-800 hover:bg-emerald-900 text-white p-4 rounded-full shadow-lg transition-transform transform hover:scale-110 flex items-center justify-center">
+            <i id="musicIcon" class="fas fa-music"></i>
+        </button>
+        <audio id="bgMusic" loop>
+            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- SECCIÓN DE BIENVENIDA (HERO) -->
+    <section class="hero-bg h-screen w-full flex flex-col justify-between items-center text-center px-4 py-12 text-white relative">
+        <div class="animate-fade-in-down mt-12">
+            <p class="uppercase tracking-widest text-sm md:text-base font-semibold text-emerald-100">¡Nos Casamos!</p>
+            <div class="w-16 h-[1px] bg-emerald-100 mx-auto my-4"></div>
+        </div>
+
+        <div class="my-auto px-2">
+            <h1 class="font-serif text-5xl md:text-7xl font-light mb-6 tracking-wide">
+                Mariela <span class="text-emerald-200 font-serif font-light text-4xl md:text-6xl">&amp;</span> Jesús
+            </h1>
+            <p class="text-md md:text-lg tracking-wide font-light max-w-lg mx-auto">Mérida, Yucatán</p>
+            <p class="text-base md:text-lg font-serif mt-6 border-y border-white/30 py-3 inline-block px-8 tracking-wider">19 • MARZO • 2027</p>
+        </div>
+
+        <div class="animate-bounce mb-4 flex flex-col items-center">
+            <span class="text-xs uppercase tracking-widest mb-2 text-emerald-100">Desliza para ver la invitación</span>
+            <i class="fas fa-chevron-down text-xl"></i>
+        </div>
+    </section>
+
+    <!-- BIENVENIDA & CUENTA REGRESIVA -->
+    <section class="py-20 px-4 max-w-4xl mx-auto text-center relative overflow-hidden">
+        <div class="absolute -left-10 -top-10 w-40 h-40 leaf-decor bg-[url('https://images.unsplash.com/photo-1501973900372-b5df481971d8?auto=format&fit=crop&w=300')] bg-contain bg-no-repeat rounded-full"></div>
+        
+        <h2 class="font-serif text-3xl md:text-4xl text-emerald-900 mb-6">Faltan sólo</h2>
+        
+        <!-- Marcador de cuenta regresiva -->
+        <div class="grid grid-cols-4 gap-2 md:gap-4 max-w-xl mx-auto mb-12">
+            <div class="bg-white/80 backdrop-blur border border-emerald-100 p-4 rounded-2xl shadow-sm">
+                <span id="days" class="block font-serif text-3xl md:text-5xl font-semibold text-emerald-800">00</span>
+                <span class="text-xs uppercase text-gray-500 tracking-wider">Días</span>
+            </div>
+            <div class="bg-white/80 backdrop-blur border border-emerald-100 p-4 rounded-2xl shadow-sm">
+                <span id="hours" class="block font-serif text-3xl md:text-5xl font-semibold text-emerald-800">00</span>
+                <span class="text-xs uppercase text-gray-500 tracking-wider">Hrs</span>
+            </div>
+            <div class="bg-white/80 backdrop-blur border border-emerald-100 p-4 rounded-2xl shadow-sm">
+                <span id="minutes" class="block font-serif text-3xl md:text-5xl font-semibold text-emerald-800">00</span>
+                <span class="text-xs uppercase text-gray-500 tracking-wider">Min</span>
+            </div>
+            <div class="bg-white/80 backdrop-blur border border-emerald-100 p-4 rounded-2xl shadow-sm">
+                <span id="seconds" class="block font-serif text-3xl md:text-5xl font-semibold text-emerald-800">00</span>
+                <span class="text-xs uppercase text-gray-500 tracking-wider">Seg</span>
+            </div>
+        </div>
+
+        <p class="text-gray-600 italic font-serif text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-6">
+            "Hay momentos en la vida que son especiales por sí solos, pero compartirlos con las personas que más queremos los hace inolvidables."
+        </p>
+        <p class="text-emerald-800 font-semibold tracking-wider uppercase text-xs">¡Estamos felices de vivir esta aventura con ustedes!</p>
+    </section>
+
+    <!-- ITINERARIO DEL FIN DE SEMANA MÁGICO -->
+    <section class="bg-emerald-900 text-white py-20 px-4 relative">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+                <p class="uppercase tracking-widest text-emerald-200 text-sm mb-2">Nuestro Fin de Semana Mágico</p>
+                <h2 class="font-serif text-4xl md:text-5xl">El Itinerario</h2>
+                <div class="w-24 h-[2px] bg-emerald-300 mx-auto mt-4"></div>
+                <p class="text-emerald-100/80 mt-4 max-w-md mx-auto text-sm">Acompáñanos a celebrar nuestro matrimonio a lo largo de un fin de semana lleno de amor, cultura y familia en Yucatán.</p>
+            </div>
+
+            <!-- TIMELINE -->
+            <div class="relative border-l border-emerald-700/80 ml-4 md:ml-32 md:mr-12 space-y-12">
+                
+                <!-- DÍA 1 - Iglesia -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-4 top-1.5 bg-emerald-800 border-2 border-emerald-400 w-8 h-8 rounded-full flex items-center justify-center text-xs text-emerald-200 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-colors">
+                        1
+                    </div>
+                    
+                    <div class="bg-emerald-800/50 hover:bg-emerald-800/70 transition-all p-6 rounded-2xl border border-emerald-700/50 shadow-md">
+                        <span class="inline-block bg-emerald-600 text-emerald-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">Viernes 19 de Marzo, 2027</span>
+                        <h3 class="font-serif text-2xl font-semibold mb-2">Boda Religiosa</h3>
+                        <p class="text-emerald-200 flex items-center gap-2 mb-3 text-sm">
+                            <i class="far fa-clock"></i> 07:00 PM - 08:00 PM
+                        </p>
+                        <p class="text-emerald-100/90 leading-relaxed mb-4">
+                            Nuestra unión ante Dios se llevará a cabo en la hermosa e histórica <strong>Iglesia de la Tercera Orden</strong>, ubicada en la mágica ciudad de Mérida, Yucatán.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="https://maps.google.com/?q=Iglesia+de+la+Tercera+Orden+Merida+Yucatan" target="_blank" class="inline-flex items-center gap-2 bg-white text-emerald-950 font-semibold px-4 py-2 rounded-xl text-xs hover:bg-emerald-100 transition-colors">
+                                <i class="fas fa-map-marker-alt"></i> Ver Mapa de la Iglesia
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DÍA 1 - Taquiza -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-4 top-1.5 bg-emerald-800 border-2 border-emerald-400 w-8 h-8 rounded-full flex items-center justify-center text-xs text-emerald-200 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-colors">
+                        2
+                    </div>
+                    
+                    <div class="bg-emerald-800/50 hover:bg-emerald-800/70 transition-all p-6 rounded-2xl border border-emerald-700/50 shadow-md">
+                        <span class="inline-block bg-emerald-600 text-emerald-100 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">Viernes 19 de Marzo, 2027</span>
+                        <h3 class="font-serif text-2xl font-semibold mb-2">Taquiza de Bienvenida</h3>
+                        <p class="text-emerald-200 flex items-center gap-2 mb-3 text-sm">
+                            <i class="far fa-clock"></i> Inmediatamente después de la ceremonia
+                        </p>
+                        <p class="text-emerald-100/90 leading-relaxed mb-4">
+                            ¡La primera celebración arranca con broche de oro! Nos reuniremos para disfrutar de una deliciosa taquiza tradicional y brindar todos juntos.
+                        </p>
+                        <div class="inline-flex items-center gap-2 bg-emerald-700/50 border border-emerald-600 text-emerald-200 px-4 py-2 rounded-xl text-xs">
+                            <i class="fas fa-info-circle"></i> Lugar por definir (Mérida, Yuc.)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DÍA 2 - Piscinada -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-4 top-1.5 bg-emerald-800 border-2 border-emerald-400 w-8 h-8 rounded-full flex items-center justify-center text-xs text-emerald-200 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-colors">
+                        3
+                    </div>
+                    
+                    <div class="bg-emerald-800/50 hover:bg-emerald-800/70 transition-all p-6 rounded-2xl border border-emerald-700/50 shadow-md">
+                        <span class="inline-block bg-amber-600 text-amber-50 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">Sábado 20 de Marzo, 2027</span>
+                        <h3 class="font-serif text-2xl font-semibold mb-2">Piscinada y Convivencia</h3>
+                        <p class="text-emerald-200 flex items-center gap-2 mb-3 text-sm">
+                            <i class="far fa-clock"></i> Todo el día
+                        </p>
+                        <p class="text-emerald-100/90 leading-relaxed mb-4">
+                            Un día libre para relajarse en la alberca, mitigar el calor yucateco, disfrutar de bebidas refrescantes y seguir compartiendo grandes momentos en un ambiente completamente casual.
+                        </p>
+                        <div class="inline-flex items-center gap-2 bg-emerald-700/50 border border-emerald-600 text-emerald-200 px-4 py-2 rounded-xl text-xs">
+                            <i class="fas fa-info-circle"></i> Lugar por definir (Mérida, Yuc.)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DÍA 3 - Viaje Familiar -->
+                <div class="relative pl-8 md:pl-12 group">
+                    <div class="absolute -left-4 top-1.5 bg-emerald-800 border-2 border-emerald-400 w-8 h-8 rounded-full flex items-center justify-center text-xs text-emerald-200 group-hover:bg-emerald-400 group-hover:text-emerald-900 transition-colors">
+                        4
+                    </div>
+                    
+                    <div class="bg-emerald-800/50 hover:bg-emerald-800/70 transition-all p-6 rounded-2xl border border-emerald-700/50 shadow-md">
+                        <span class="inline-block bg-amber-600 text-amber-50 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-3">Domingo 21 de Marzo, 2027</span>
+                        <h3 class="font-serif text-2xl font-semibold mb-4">Viaje Familiar: Descubriendo Yucatán</h3>
+                        
+                        <p class="text-emerald-100/90 leading-relaxed mb-6">
+                            Para concluir este maravilloso fin de semana, daremos un recorrido en familia por los puntos turísticos e históricos más asombrosos del estado. ¡Acompáñanos en la ruta!
+                        </p>
+
+                        <!-- Sub-pasos del viaje -->
+                        <div class="space-y-4 border-l-2 border-emerald-600 pl-4">
+                            <div class="relative">
+                                <h4 class="font-semibold text-emerald-200 text-md"><i class="fas fa-landmark mr-2"></i>1. Visita a Chichén Itzá</h4>
+                                <p class="text-xs text-emerald-100/70">Iniciamos temprano el día para maravillarnos ante una de las joyas del mundo prehispánico.</p>
+                            </div>
+                            <div class="relative">
+                                <h4 class="font-semibold text-emerald-200 text-md"><i class="fas fa-archway mr-2"></i>2. Paseo en Valladolid</h4>
+                                <p class="text-xs text-emerald-100/70">Caminaremos por las hermosas calles coloniales de este pintoresco Pueblo Mágico.</p>
+                            </div>
+                            <div class="relative">
+                                <h4 class="font-semibold text-emerald-200 text-md"><i class="fas fa-swimmer mr-2"></i>3. Visita al Cenote</h4>
+                                <p class="text-xs text-emerald-100/70">Nos refrescaremos en las aguas místicas y cristalinas de un cenote ancestral.</p>
+                            </div>
+                            <div class="relative">
+                                <h4 class="font-semibold text-emerald-200 text-md"><i class="fas fa-route mr-2"></i>4. Seguir Paseando...</h4>
+                                <p class="text-xs text-emerald-100/70">Para disfrutar del atardecer y seguir explorando juntos los rincones de la península.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- DETALLES DE VESTIMENTA & MENSAJE DE BIENVENIDA -->
+    <section class="py-20 px-4 bg-[#f1ede2] text-center">
+        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Vestimenta -->
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 flex flex-col justify-between">
+                <div>
+                    <div class="text-emerald-800 text-4xl mb-4">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <h3 class="font-serif text-2xl font-bold text-emerald-950 mb-2">Código de Vestimenta</h3>
+                    <p class="text-sm text-emerald-800 font-semibold mb-4">Solo Formal</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Te invitamos a acompañarnos vistiendo de manera formal para celebrar esta gran ocasión a nuestro lado.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Mensaje de bienvenida sin regalos -->
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 flex flex-col justify-between">
+                <div>
+                    <div class="text-emerald-800 text-4xl mb-4">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="font-serif text-2xl font-bold text-emerald-950 mb-2">Su Presencia</h3>
+                    <p class="text-sm text-emerald-800 font-semibold mb-4">¡Nuestra mayor alegría!</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Para nosotros, el regalo más grande es poder compartir este día tan importante a su lado. Todos son sumamente bienvenidos; saber que contamos con su valiosa presencia, amor y apoyo es más que suficiente para hacer de nuestra boda un día perfecto.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FORMULARIO DE CONFIRMACIÓN -->
+    <section class="py-20 px-4 bg-white" id="rsvpSection">
+        <div class="max-w-xl mx-auto bg-[#faf8f4] border border-emerald-100 p-8 md:p-12 rounded-3xl shadow-lg relative">
+            <div class="text-center mb-8">
+                <span class="text-xs uppercase tracking-widest text-emerald-700 font-bold">R.S.V.P</span>
+                <h2 class="font-serif text-3xl md:text-4xl text-emerald-950 mt-1">Confirma tu Asistencia</h2>
+                <p class="text-gray-500 text-sm mt-2">Por favor, indícanos si podrás acompañarnos antes del 1 de Febrero del 2027.</p>
+            </div>
+
+            <!-- Formulario interactivo -->
+            <form id="rsvpForm" class="space-y-6">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">Nombre Completo del Invitado Principal</label>
+                    <input type="text" id="guestName" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Ej. Juan Carlos Pérez">
+                </div>
+
+                <!-- CONFIRMACIÓN VIERNES -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">¿Asistirá el Viernes 19?</label>
+                    <p class="text-xs text-gray-500 mb-2">(Boda Religiosa &amp; Taquiza de Bienvenida)</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
+                            <input type="radio" name="attendanceFri" value="si" required class="text-emerald-700 focus:ring-emerald-700"> ¡Sí, asistiré!
+                        </label>
+                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
+                            <input type="radio" name="attendanceFri" value="no" class="text-emerald-700 focus:ring-emerald-700"> No podré ir
+                        </label>
+                    </div>
+                </div>
+
+                <!-- CONFIRMACIÓN SÁBADO -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">¿Asistirá el Sábado 20?</label>
+                    <p class="text-xs text-gray-500 mb-2">(Día de Piscinada &amp; Convivencia)</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
+                            <input type="radio" name="attendanceSat" value="si" required class="text-emerald-700 focus:ring-emerald-700"> ¡Sí, asistiré!
+                        </label>
+                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
+                            <input type="radio" name="attendanceSat" value="no" class="text-emerald-700 focus:ring-emerald-700"> No podré ir
+                        </label>
+                    </div>
+                </div>
+
+                <!-- CONFIRMACIÓN DOMINGO -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">¿Te sumas al viaje del Domingo 21?</label>
+                    <p class="text-xs text-gray-500 mb-2">(Paseo Familiar a Chichén Itzá, Valladolid y Cenote)</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
+                            <input type="radio" name="attendanceSun" value="si" required class="text-emerald-700 focus:ring-emerald-700"> Sí, me uno
+                        </label>
+                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
+                            <input type="radio" name="attendanceSun" value="no" class="text-emerald-700 focus:ring-emerald-700"> No podré ir
+                        </label>
+                    </div>
+                </div>
+
+                <!-- NÚMERO DE ACOMPAÑANTES (NUMÉRICO EXACTO) -->
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">Número de acompañantes (adicionales a ti)</label>
+                    <p class="text-xs text-gray-500 mb-2">Escribe "0" si asistes sin acompañantes adicionales.</p>
+                    <input type="number" id="companions" min="0" max="15" required value="0" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">¿Alguna nota extra o restricción alimentaria?</label>
+                    <textarea id="notes" rows="3" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Ej: Menú vegetariano, alergias..."></textarea>
+                </div>
+
+                <button id="submitBtn" type="submit" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-4 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
+                    <span>Confirmar mi Asistencia</span>
+                </button>
+            </form>
+
+            <!-- Mensaje de agradecimiento dinámico -->
+            <div id="thankYouMsg" class="hidden text-center py-8">
+                <div class="text-emerald-700 text-6xl mb-4">
+                    <i class="fas fa-check-circle animate-bounce"></i>
+                </div>
+                <h3 class="font-serif text-2xl text-emerald-950 font-semibold mb-2">¡Asistencia Registrada!</h3>
+                <p id="thankYouDetails" class="text-gray-600 text-sm leading-relaxed mb-6"></p>
+                <button onclick="resetForm()" class="text-xs text-emerald-800 underline font-semibold">Registrar otra respuesta</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER & ACCESO AL PANEL SECRETO -->
+    <footer class="bg-emerald-950 text-emerald-100 py-12 px-4 text-center border-t border-emerald-800 relative">
+        <div class="max-w-4xl mx-auto relative">
+            <h2 class="font-serif text-3xl italic mb-2 text-white">¡Los esperamos con todo el corazón!</h2>
+            <p class="font-serif text-sm text-emerald-200 max-w-md mx-auto mb-6">Mariela &amp; Jesús</p>
+            <p class="text-xs text-emerald-300/50">&copy; 2027 • Mérida, Yucatán • Hecho con amor</p>
+            
+            <!-- Botón discreto de administración (Icono de Candado) -->
+            <button onclick="openAdminModal()" class="absolute right-2 bottom-0 text-emerald-800 hover:text-emerald-500 text-xs p-2 transition-colors" title="Panel de Organizadores">
+                <i class="fas fa-lock"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- MODAL DE ACCESO AL PANEL DE ADMINISTRACIÓN -->
+    <div id="adminAuthModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-gray-800 p-6 md:p-8 rounded-3xl max-w-md w-full shadow-2xl relative">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto mb-3 text-lg">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3 class="font-serif text-2xl font-bold text-gray-900">Panel de Organizadores</h3>
+                <p class="text-xs text-gray-500 mt-1">Introduce la clave para ver el reporte de asistencia.</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-2">Contraseña</label>
+                    <input type="password" id="adminPassword" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Pista: boda">
+                </div>
+                <p id="authError" class="text-red-600 text-xs hidden">Clave incorrecta. Inténtalo de nuevo.</p>
+                <button onclick="verifyAdminPassword()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 rounded-xl transition-all">
+                    Acceder al Reporte
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DEL REPORTES & DASHBOARD DE ASISTENCIA (ADMIN PANEL) -->
+    <div id="adminDashboardModal" class="fixed inset-0 bg-gray-100 z-50 hidden overflow-y-auto p-4 md:p-8">
+        <div class="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
+            
+            <!-- Cabecera del Dashboard -->
+            <div class="bg-emerald-900 text-white p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="font-serif text-3xl font-bold">Reporte de Asistencia de Bodas</h2>
+                    <p class="text-emerald-200 text-sm">Control en tiempo real • Mariela &amp; Jesús</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="exportToCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
+                        <i class="fas fa-file-excel"></i> Descargar Excel (CSV)
+                    </button>
+                    <button onclick="closeAdminDashboard()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
+                        <i class="fas fa-door-open"></i> Salir del Panel
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 md:p-8 space-y-8">
+                <!-- TARJETAS DE MÉTRICAS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl">
+                        <span class="text-xs uppercase font-bold text-emerald-800 tracking-wider">Total Confirmados</span>
+                        <h3 id="statTotal" class="font-serif text-4xl font-bold text-emerald-950 mt-2">0</h3>
+                        <p class="text-xs text-emerald-700 mt-1">Invitados + Acompañantes</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-100 p-6 rounded-2xl">
+                        <span class="text-xs uppercase font-bold text-blue-800 tracking-wider">Asistencia Viernes 19</span>
+                        <h3 id="statFri" class="font-serif text-4xl font-bold text-blue-950 mt-2">0</h3>
+                        <p class="text-xs text-blue-700 mt-1">Boda religiosa &amp; Taquiza</p>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 p-6 rounded-2xl">
+                        <span class="text-xs uppercase font-bold text-amber-800 tracking-wider">Asistencia Sábado 20</span>
+                        <h3 id="statSat" class="font-serif text-4xl font-bold text-amber-950 mt-2">0</h3>
+                        <p class="text-xs text-amber-700 mt-1">Día de Piscinada</p>
+                    </div>
+                    <div class="bg-purple-50 border border-purple-100 p-6 rounded-2xl">
+                        <span class="text-xs uppercase font-bold text-purple-800 tracking-wider">Asistencia Domingo 21</span>
+                        <h3 id="statSun" class="font-serif text-4xl font-bold text-purple-950 mt-2">0</h3>
+                        <p class="text-xs text-purple-700 mt-1">Viaje Chichén/Valladolid</p>
+                    </div>
+                </div>
+
+                <!-- TABLA DE INVITADOS -->
+                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+                    <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <h4 class="font-bold text-gray-700">Desglose de Confirmados</h4>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-600 uppercase text-xs font-bold border-b border-gray-200">
+                                    <th class="p-4">Nombre del Invitado</th>
+                                    <th class="p-4 text-center">Acompañantes</th>
+                                    <th class="p-4 text-center">Viernes 19 (Boda)</th>
+                                    <th class="p-4 text-center">Sábado 20 (Alberca)</th>
+                                    <th class="p-4 text-center">Domingo 21 (Tour)</th>
+                                    <th class="p-4">Notas/Restricciones</th>
+                                    <th class="p-4 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody" class="text-sm text-gray-700 divide-y divide-gray-100">
+                                <!-- Filas inyectadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓN DE MENSAJE -->
+    <div id="toastNotification" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm shadow-lg z-50 opacity-0 pointer-events-none transition-all duration-300">
+        <!-- Texto inyectado -->
+    </div>
+
+    <!-- LÓGICA DE FIREBASE Y FUNCIONALIDADES DE LA INVITACIÓN -->
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot } from "firebase/firestore";
+
+        // Configuración de Firebase - Base de datos unificada en la nube para vuestra invitación
+        const firebaseConfig = {
+            apiKey: "", // La clave de API se inyecta automáticamente en producción por el entorno
+            authDomain: "wedding-mariela-jesus.firebaseapp.com",
+            projectId: "wedding-mariela-jesus",
+            storageBucket: "wedding-mariela-jesus.appspot.com",
+            messagingSenderId: "303259823522",
+            appId: "1:303259823522:web:75734273dfec8cf2df1203"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Identificador del proyecto para aislar tus colecciones (Siguiendo Regla 1 de Firestore)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
+        const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'confirmaciones');
+
+        // Estado del usuario autenticado
+        let currentUser = null;
+        let guestsList = [];
+
+        // Conectar e iniciar sesión anónima de forma segura (Siguiendo Regla 3 de Firestore)
+        const initFirebaseSession = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Error al autenticar sesión de Firebase:", error);
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // Escuchar datos en tiempo real de forma segura y actualizar dashboard
+                onSnapshot(collectionRef, (snapshot) => {
+                    guestsList = [];
+                    snapshot.forEach((doc) => {
+                        guestsList.push({ id: doc.id, ...doc.data() });
+                    });
+                    // Si el dashboard está abierto, refrescar su vista
+                    if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
+                        renderDashboard();
+                    }
+                }, (error) => {
+                    console.error("Error al leer confirmaciones en tiempo real:", error);
+                });
+            } else {
+                initFirebaseSession();
+            }
+        });
+
+        // Inicializar sesión inmediatamente al cargar
+        initFirebaseSession();
+
+        // ============================================
+        // CUENTA REGRESIVA
+        // ============================================
+        const targetDate = new Date("March 19, 2027 19:00:00").getTime();
+        const countdownInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            const daysEl = document.getElementById("days");
+            const hoursEl = document.getElementById("hours");
+            const minutesEl = document.getElementById("minutes");
+            const secondsEl = document.getElementById("seconds");
+
+            if (daysEl) daysEl.innerText = days < 10 ? "0" + days : days;
+            if (hoursEl) hoursEl.innerText = hours < 10 ? "0" + hours : hours;
+            if (minutesEl) minutesEl.innerText = minutes < 10 ? "0" + minutes : minutes;
+            if (secondsEl) secondsEl.innerText = seconds < 10 ? "0" + seconds : seconds;
+
+            if (difference < 0) {
+                clearInterval(countdownInterval);
+                if (daysEl) daysEl.innerText = "00";
+                if (hoursEl) hoursEl.innerText = "00";
+                if (minutesEl) minutesEl.innerText = "00";
+                if (secondsEl) secondsEl.innerText = "00";
+            }
+        }, 1000);
+
+        // ============================================
+        // MÚSICA DE FONDO
+        // ============================================
+        const bgMusic = document.getElementById("bgMusic");
+        const musicToggle = document.getElementById("musicToggle");
+        const musicIcon = document.getElementById("musicIcon");
+        let isPlaying = false;
+
+        musicToggle.addEventListener("click", () => {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicIcon.classList.remove("fa-volume-up");
+                musicIcon.classList.add("fa-music");
+            } else {
+                bgMusic.play().then(() => {
+                    musicIcon.classList.remove("fa-music");
+                    musicIcon.classList.add("fa-volume-up");
+                }).catch(e => console.log("La reproducción requiere interacción del usuario previa."));
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // ============================================
+        // ENVÍO DE RSVP DIRECTO A LA NUBE (FIRESTORE)
+        // ============================================
+        const rsvpForm = document.getElementById("rsvpForm");
+        const thankYouMsg = document.getElementById("thankYouMsg");
+        const thankYouDetails = document.getElementById("thankYouDetails");
+
+        rsvpForm.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            // Deshabilitar botón durante el envío para evitar duplicados
+            const submitBtn = document.getElementById("submitBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fas fa-spinner animate-spin"></i> <span>Registrando...</span>`;
+
+            const guestName = document.getElementById("guestName").value;
+            const attendFri = document.querySelector('input[name="attendanceFri"]:checked').value;
+            const attendSat = document.querySelector('input[name="attendanceSat"]:checked').value;
+            const attendSun = document.querySelector('input[name="attendanceSun"]:checked').value;
+            const companionsVal = parseInt(document.getElementById("companions").value) || 0;
+            const notes = document.getElementById("notes").value;
+
+            try {
+                // Agregar documento a la base de datos de forma robusta
+                await addDoc(collectionRef, {
+                    name: guestName,
+                    fri: attendFri,
+                    sat: attendSat,
+                    sun: attendSun,
+                    companions: companionsVal,
+                    notes: notes ? notes : "Ninguna",
+                    timestamp: new Date().toISOString()
+                });
+
+                let planList = [];
+                if (attendFri === 'si') planList.push("la Boda Religiosa y Taquiza (Viernes)");
+                if (attendSat === 'si') planList.push("la Piscinada (Sábado)");
+                if (attendSun === 'si') planList.push("el Paseo Familiar (Domingo)");
+
+                let totalInParty = 1 + companionsVal;
+                let messageText = `¡Muchas gracias, <strong>${guestName}</strong>! Hemos registrado un total de <strong>${totalInParty} asistente(s)</strong> para tu grupo en la base de datos en tiempo real.<br><br>`;
+                
+                if (planList.length > 0) {
+                    messageText += `Confirmaste asistencia para: <strong>${planList.join(", ")}</strong>. ¡Será maravilloso tenerte con nosotros en Yucatán!`;
+                } else {
+                    messageText += "Lamentamos que no puedas acompañarnos, pero agradecemos tu tiempo para avisarnos.";
+                }
+
+                rsvpForm.classList.add("hidden");
+                thankYouMsg.classList.remove("hidden");
+                thankYouDetails.innerHTML = messageText;
+
+            } catch (error) {
+                console.error("Error al registrar asistencia en la nube:", error);
+                showToast("Hubo un error de conexión, por favor intenta de nuevo.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<span>Confirmar mi Asistencia</span>`;
+            }
+        });
+
+        // ============================================
+        // CONTROL DEL PANEL DE REPORTES (ADMIN)
+        // ============================================
+        window.openAdminModal = function() {
+            document.getElementById("adminAuthModal").classList.remove("hidden");
+            document.getElementById("adminPassword").focus();
+        };
+
+        window.closeAdminAuthModal = function() {
+            document.getElementById("adminAuthModal").classList.add("hidden");
+            document.getElementById("adminPassword").value = "";
+            document.getElementById("authError").classList.add("hidden");
+        };
+
+        window.verifyAdminPassword = function() {
+            const pass = document.getElementById("adminPassword").value;
+            if (pass.toLowerCase() === "boda") {
+                closeAdminAuthModal();
+                showAdminDashboard();
+            } else {
+                document.getElementById("authError").classList.remove("hidden");
+            }
+        };
+
+        window.closeAdminDashboard = function() {
+            document.getElementById("adminDashboardModal").classList.add("hidden");
+        };
+
+        function showAdminDashboard() {
+            document.getElementById("adminDashboardModal").classList.remove("hidden");
+            renderDashboard();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toastNotification");
+            toast.innerText = message;
+            toast.classList.remove("opacity-0", "pointer-events-none");
+            toast.classList.add("opacity-100");
+            setTimeout(() => {
+                toast.classList.remove("opacity-100");
+                toast.classList.add("opacity-0", "pointer-events-none");
+            }, 3000);
+        }
+
+        // Renderiza el dashboard con datos reales de la nube
+        function renderDashboard() {
+            const tableBody = document.getElementById("adminTableBody");
+            tableBody.innerHTML = "";
+
+            let totalGuests = 0;
+            let fridayCount = 0;
+            let saturdayCount = 0;
+            let sundayCount = 0;
+
+            // Ordenar en memoria por nombre para cumplir regla 2 de Firestore (no queries complejas)
+            const sortedGuests = [...guestsList].sort((a, b) => a.name.localeCompare(b.name));
+
+            sortedGuests.forEach(item => {
+                const totalParty = 1 + parseInt(item.companions);
+                totalGuests += totalParty;
+
+                if (item.fri === 'si') fridayCount += totalParty;
+                if (item.sat === 'si') saturdayCount += totalParty;
+                if (item.sun === 'si') sundayCount += totalParty;
+
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-gray-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 font-semibold text-gray-900">${item.name}</td>
+                    <td class="p-4 text-center font-medium">${item.companions}</td>
+                    <td class="p-4 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.fri === 'si' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+                            ${item.fri === 'si' ? 'SÍ' : 'NO'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.sat === 'si' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">
+                            ${item.sat === 'si' ? 'SÍ' : 'NO'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.sun === 'si' ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800'}">
+                            ${item.sun === 'si' ? 'SÍ' : 'NO'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-xs text-gray-600 max-w-xs truncate" title="${item.notes}">${item.notes}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="deleteGuestRecord('${item.id}')" class="text-red-600 hover:text-red-900" title="Eliminar de la lista">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            document.getElementById("statTotal").innerText = totalGuests;
+            document.getElementById("statFri").innerText = fridayCount;
+            document.getElementById("statSat").innerText = saturdayCount;
+            document.getElementById("statSun").innerText = sundayCount;
+        }
+
+        // Eliminar confirmaciones directamente de la nube
+        window.deleteGuestRecord = async function(id) {
+            const confirmAction = confirm("¿Estás seguro de que deseas eliminar este registro de confirmación de forma permanente?");
+            if (confirmAction) {
+                try {
+                    const docToDel = doc(db, 'artifacts', appId, 'public', 'data', 'confirmaciones', id);
+                    await deleteDoc(docToDel);
+                    showToast("Registro eliminado con éxito.");
+                } catch (error) {
+                    console.error("Error al eliminar documento:", error);
+                    showToast("No se pudo eliminar el registro. Inténtalo más tarde.");
+                }
+            }
+        };
+
+        // Exportar a Excel (CSV)
+        window.exportToCSV = function() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nombre de Invitado,Acompanantes,Asiste Viernes,Asiste Sabado,Asiste Domingo,Notas\n";
+            
+            guestsList.forEach(item => {
+                const name = item.name.replace(/,/g, " ");
+                const notes = item.notes.replace(/,/g, " ");
+                csvContent += `${name},${item.companions},${item.fri.toUpperCase()},${item.sat.toUpperCase()},${item.sun.toUpperCase()},${notes}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Asistencia_Boda_Mariela_y_Jesus.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Descargando reporte de asistencia...");
+        };
+
+        // Resetear Formulario
+        window.resetForm = function() {
+            rsvpForm.reset();
+            rsvpForm.classList.remove("hidden");
+            thankYouMsg.classList.add("hidden");
+        };
+    </script>
+</body>
+</html>

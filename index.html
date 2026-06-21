@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -318,7 +319,7 @@
                     </div>
                 </div>
 
-                <!-- NÚMERO DE ACOMPAÑANTES (NUMÉRICO EXACTO) -->
+                <!-- NÚMERO DE ACOMPAÑANTES -->
                 <div>
                     <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">Número de acompañantes (adicionales a ti)</label>
                     <p class="text-xs text-gray-500 mb-2">Escribe "0" si asistes sin acompañantes adicionales.</p>
@@ -474,7 +475,7 @@
 
         // Configuración de Firebase - Base de datos unificada en la nube para vuestra invitación
         const firebaseConfig = {
-            apiKey: "", // La clave de API se inyecta automáticamente en producción por el entorno
+            apiKey: "", // La clave de API se inyecta automáticamente en producción por el entorno o la reemplazas tú
             authDomain: "wedding-mariela-jesus.firebaseapp.com",
             projectId: "wedding-mariela-jesus",
             storageBucket: "wedding-mariela-jesus.appspot.com",
@@ -592,7 +593,6 @@
         rsvpForm.addEventListener("submit", async function(event) {
             event.preventDefault();
 
-            // Deshabilitar botón durante el envío para evitar duplicados
             const submitBtn = document.getElementById("submitBtn");
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i class="fas fa-spinner animate-spin"></i> <span>Registrando...</span>`;
@@ -605,7 +605,6 @@
             const notes = document.getElementById("notes").value;
 
             try {
-                // Agregar documento a la base de datos de forma robusta
                 await addDoc(collectionRef, {
                     name: guestName,
                     fri: attendFri,
@@ -644,8 +643,9 @@
         });
 
         // ============================================
-        // CONTROL DEL PANEL DE REPORTES (ADMIN)
+        // CONTROL DEL PANEL DE REPORTES (ADMIN) - EXPOSICIÓN GLOBAL PARA "onclick"
         // ============================================
+        
         window.openAdminModal = function() {
             document.getElementById("adminAuthModal").classList.remove("hidden");
             document.getElementById("adminPassword").focus();
@@ -660,7 +660,7 @@
         window.verifyAdminPassword = function() {
             const pass = document.getElementById("adminPassword").value;
             if (pass.toLowerCase() === "boda") {
-                closeAdminAuthModal();
+                window.closeAdminAuthModal();
                 showAdminDashboard();
             } else {
                 document.getElementById("authError").classList.remove("hidden");
@@ -697,7 +697,6 @@
             let saturdayCount = 0;
             let sundayCount = 0;
 
-            // Ordenar en memoria por nombre para cumplir regla 2 de Firestore (no queries complejas)
             const sortedGuests = [...guestsList].sort((a, b) => a.name.localeCompare(b.name));
 
             sortedGuests.forEach(item => {
@@ -744,7 +743,7 @@
             document.getElementById("statSun").innerText = sundayCount;
         }
 
-        // Eliminar confirmaciones directamente de la nube
+        // Eliminar confirmaciones directamente de la nube expuesta al entorno global
         window.deleteGuestRecord = async function(id) {
             const confirmAction = confirm("¿Estás seguro de que deseas eliminar este registro de confirmación de forma permanente?");
             if (confirmAction) {
@@ -786,6 +785,15 @@
             rsvpForm.classList.remove("hidden");
             thankYouMsg.classList.add("hidden");
         };
+
+        // Permitir entrar con "Enter" en el campo contraseña
+        document.getElementById("adminPassword").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                window.verifyAdminPassword();
+            }
+        });
     </script>
 </body>
 </html>
+
+```

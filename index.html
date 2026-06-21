@@ -398,6 +398,9 @@
                     <p class="text-emerald-200 text-sm">Control en tiempo real • Mariela &amp; Jesús</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
+                    <button onclick="openApiKeyModal()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
+                        <i class="fas fa-key"></i> Config Firebase
+                    </button>
                     <button onclick="exportToCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all">
                         <i class="fas fa-file-excel"></i> Descargar Excel (CSV)
                     </button>
@@ -461,85 +464,56 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONFIGURACIÓN DE API KEY DE FIREBASE -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white text-gray-800 p-6 md:p-8 rounded-3xl max-w-lg w-full shadow-2xl relative">
+            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-lg">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-3 text-lg">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h3 class="font-serif text-2xl font-bold text-gray-900">Configurar Firebase</h3>
+                <p class="text-xs text-gray-500 mt-1">Pega tu API Key para habilitar la base de datos en la nube.</p>
+            </div>
+
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-xs text-gray-600 space-y-2">
+                <p class="font-semibold text-gray-800">Pasos para obtener tu API Key:</p>
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>Ve a <strong>console.firebase.google.com</strong></li>
+                    <li>Abre tu proyecto (<em>wedding-mariela-jesus</em>)</li>
+                    <li>Click en el engranaje <i class="fas fa-cog"></i> &rarr; <strong>Configuracion del proyecto</strong></li>
+                    <li>En la seccion <strong>Tus apps</strong>, busca la app web</li>
+                    <li>Copia el valor de <code>apiKey</code> del objeto <code>firebaseConfig</code></li>
+                </ol>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-2">API Key</label>
+                    <input type="text" id="apiKeyInput" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono" placeholder="AIzaSy...">
+                </div>
+                <button onclick="saveApiKey()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl transition-all">
+                    Guardar y Conectar
+                </button>
+                <p class="text-xs text-center text-gray-400">Se guarda en localStorage. La pagina se recargara automaticamente.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- NOTIFICACIÓN DE MENSAJE -->
     <div id="toastNotification" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm shadow-lg z-50 opacity-0 pointer-events-none transition-all duration-300">
         <!-- Texto inyectado -->
     </div>
 
-    <!-- LÓGICA DE FIREBASE Y FUNCIONALIDADES DE LA INVITACIÓN -->
-    <script type="module">
-        import { initializeApp } from "firebase/app";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot } from "firebase/firestore";
-
-        // Configuración de Firebase - Base de datos unificada en la nube para vuestra invitación
-        const firebaseConfig = {
-            apiKey: "", // REEMPLAZAR con tu API key de Firebase Console
-            authDomain: "wedding-mariela-jesus.firebaseapp.com",
-            projectId: "wedding-mariela-jesus",
-            storageBucket: "wedding-mariela-jesus.appspot.com",
-            messagingSenderId: "303259823522",
-            appId: "1:303259823522:web:75734273dfec8cf2df1203"
-        };
-
-        // Estado global
-        let currentUser = null;
-        let guestsList = [];
-        let db = null;
-        let collectionRef = null;
-        let firebaseReady = false;
-
-        // Inicializar Firebase con manejo de errores
-        try {
-            if (!firebaseConfig.apiKey) {
-                console.warn("Firebase API key no configurada. La funcionalidad de base de datos está deshabilitada.");
-            } else {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                db = getFirestore(app);
-
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
-                collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'confirmaciones');
-                firebaseReady = true;
-
-                const initFirebaseSession = async () => {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (error) {
-                        console.error("Error al autenticar sesión de Firebase:", error);
-                    }
-                };
-
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        currentUser = user;
-                        onSnapshot(collectionRef, (snapshot) => {
-                            guestsList = [];
-                            snapshot.forEach((d) => {
-                                guestsList.push({ id: d.id, ...d.data() });
-                            });
-                            if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
-                                renderDashboard();
-                            }
-                        }, (error) => {
-                            console.error("Error al leer confirmaciones en tiempo real:", error);
-                        });
-                    } else {
-                        initFirebaseSession();
-                    }
-                });
-
-                initFirebaseSession();
-            }
-        } catch (error) {
-            console.error("Error al inicializar Firebase:", error);
-        }
-
+    <!-- LÓGICA DE UI (no depende de Firebase) -->
+    <script>
         // ============================================
         // CUENTA REGRESIVA
         // ============================================
         const targetDate = new Date("March 19, 2027 19:00:00").getTime();
-        const countdownInterval = setInterval(function() {
+        setInterval(function() {
             const now = new Date().getTime();
             const difference = targetDate - now;
 
@@ -553,197 +527,146 @@
             const minutesEl = document.getElementById("minutes");
             const secondsEl = document.getElementById("seconds");
 
-            if (daysEl) daysEl.innerText = days < 10 ? "0" + days : days;
-            if (hoursEl) hoursEl.innerText = hours < 10 ? "0" + hours : hours;
-            if (minutesEl) minutesEl.innerText = minutes < 10 ? "0" + minutes : minutes;
-            if (secondsEl) secondsEl.innerText = seconds < 10 ? "0" + seconds : seconds;
-
-            if (difference < 0) {
-                clearInterval(countdownInterval);
-                if (daysEl) daysEl.innerText = "00";
-                if (hoursEl) hoursEl.innerText = "00";
-                if (minutesEl) minutesEl.innerText = "00";
-                if (secondsEl) secondsEl.innerText = "00";
+            if (difference > 0) {
+                if (daysEl) daysEl.innerText = days < 10 ? "0" + days : days;
+                if (hoursEl) hoursEl.innerText = hours < 10 ? "0" + hours : hours;
+                if (minutesEl) minutesEl.innerText = minutes < 10 ? "0" + minutes : minutes;
+                if (secondsEl) secondsEl.innerText = seconds < 10 ? "0" + seconds : seconds;
             }
         }, 1000);
 
         // ============================================
         // MÚSICA DE FONDO
         // ============================================
-        const bgMusic = document.getElementById("bgMusic");
-        const musicToggle = document.getElementById("musicToggle");
-        const musicIcon = document.getElementById("musicIcon");
-        let isPlaying = false;
+        (function() {
+            const bgMusic = document.getElementById("bgMusic");
+            const musicToggle = document.getElementById("musicToggle");
+            const musicIcon = document.getElementById("musicIcon");
+            let isPlaying = false;
 
-        musicToggle.addEventListener("click", () => {
-            if (isPlaying) {
-                bgMusic.pause();
-                musicIcon.classList.remove("fa-volume-up");
-                musicIcon.classList.add("fa-music");
-            } else {
-                bgMusic.play().then(() => {
-                    musicIcon.classList.remove("fa-music");
-                    musicIcon.classList.add("fa-volume-up");
-                }).catch(e => console.log("La reproducción requiere interacción del usuario previa."));
-            }
-            isPlaying = !isPlaying;
-        });
-
-        // ============================================
-        // ENVÍO DE RSVP DIRECTO A LA NUBE (FIRESTORE)
-        // ============================================
-        const rsvpForm = document.getElementById("rsvpForm");
-        const thankYouMsg = document.getElementById("thankYouMsg");
-        const thankYouDetails = document.getElementById("thankYouDetails");
-
-        rsvpForm.addEventListener("submit", async function(event) {
-            event.preventDefault();
-
-            const submitBtn = document.getElementById("submitBtn");
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="fas fa-spinner animate-spin"></i> <span>Registrando...</span>`;
-
-            const guestName = document.getElementById("guestName").value;
-            const attendFri = document.querySelector('input[name="attendanceFri"]:checked').value;
-            const attendSat = document.querySelector('input[name="attendanceSat"]:checked').value;
-            const attendSun = document.querySelector('input[name="attendanceSun"]:checked').value;
-            const companionsVal = parseInt(document.getElementById("companions").value) || 0;
-            const notes = document.getElementById("notes").value;
-
-            try {
-                if (!firebaseReady || !collectionRef) {
-                    throw new Error("Base de datos no disponible. Configura el API key de Firebase.");
-                }
-
-                await addDoc(collectionRef, {
-                    name: guestName,
-                    fri: attendFri,
-                    sat: attendSat,
-                    sun: attendSun,
-                    companions: companionsVal,
-                    notes: notes ? notes : "Ninguna",
-                    timestamp: new Date().toISOString()
-                });
-
-                let planList = [];
-                if (attendFri === 'si') planList.push("la Boda Religiosa y Taquiza (Viernes)");
-                if (attendSat === 'si') planList.push("la Piscinada (Sábado)");
-                if (attendSun === 'si') planList.push("el Paseo Familiar (Domingo)");
-
-                let totalInParty = 1 + companionsVal;
-                let messageText = `¡Muchas gracias, <strong>${guestName}</strong>! Hemos registrado un total de <strong>${totalInParty} asistente(s)</strong> para tu grupo en la base de datos en tiempo real.<br><br>`;
-                
-                if (planList.length > 0) {
-                    messageText += `Confirmaste asistencia para: <strong>${planList.join(", ")}</strong>. ¡Será maravilloso tenerte con nosotros en Yucatán!`;
+            musicToggle.addEventListener("click", function() {
+                if (isPlaying) {
+                    bgMusic.pause();
+                    musicIcon.classList.remove("fa-volume-up");
+                    musicIcon.classList.add("fa-music");
                 } else {
-                    messageText += "Lamentamos que no puedas acompañarnos, pero agradecemos tu tiempo para avisarnos.";
+                    bgMusic.play().then(function() {
+                        musicIcon.classList.remove("fa-music");
+                        musicIcon.classList.add("fa-volume-up");
+                    }).catch(function() {});
                 }
-
-                rsvpForm.classList.add("hidden");
-                thankYouMsg.classList.remove("hidden");
-                thankYouDetails.innerHTML = messageText;
-
-            } catch (error) {
-                console.error("Error al registrar asistencia en la nube:", error);
-                showToast("Hubo un error de conexión, por favor intenta de nuevo.");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<span>Confirmar mi Asistencia</span>`;
-            }
-        });
+                isPlaying = !isPlaying;
+            });
+        })();
 
         // ============================================
-        // CONTROL DEL PANEL DE REPORTES (ADMIN) - EXPOSICIÓN GLOBAL PARA "onclick"
+        // UTILIDADES DE UI
         // ============================================
-        
-        window.openAdminModal = function() {
-            document.getElementById("adminAuthModal").classList.remove("hidden");
-            document.getElementById("adminPassword").focus();
-        };
-
-        window.closeAdminAuthModal = function() {
-            document.getElementById("adminAuthModal").classList.add("hidden");
-            document.getElementById("adminPassword").value = "";
-            document.getElementById("authError").classList.add("hidden");
-        };
-
-        window.verifyAdminPassword = function() {
-            const pass = document.getElementById("adminPassword").value;
-            if (pass.toLowerCase() === "boda") {
-                window.closeAdminAuthModal();
-                showAdminDashboard();
-            } else {
-                document.getElementById("authError").classList.remove("hidden");
-            }
-        };
-
-        window.closeAdminDashboard = function() {
-            document.getElementById("adminDashboardModal").classList.add("hidden");
-        };
-
-        function showAdminDashboard() {
-            document.getElementById("adminDashboardModal").classList.remove("hidden");
-            renderDashboard();
-        }
-
         function showToast(message) {
             const toast = document.getElementById("toastNotification");
             toast.innerText = message;
             toast.classList.remove("opacity-0", "pointer-events-none");
             toast.classList.add("opacity-100");
-            setTimeout(() => {
+            setTimeout(function() {
                 toast.classList.remove("opacity-100");
                 toast.classList.add("opacity-0", "pointer-events-none");
             }, 3000);
         }
 
-        // Renderiza el dashboard con datos reales de la nube
+        // ============================================
+        // MODAL DE ADMIN
+        // ============================================
+        function openAdminModal() {
+            document.getElementById("adminAuthModal").classList.remove("hidden");
+            document.getElementById("adminPassword").focus();
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById("adminAuthModal").classList.add("hidden");
+            document.getElementById("adminPassword").value = "";
+            document.getElementById("authError").classList.add("hidden");
+        }
+
+        function verifyAdminPassword() {
+            const pass = document.getElementById("adminPassword").value;
+            if (pass.toLowerCase() === "boda") {
+                closeAdminAuthModal();
+                showAdminDashboard();
+            } else {
+                document.getElementById("authError").classList.remove("hidden");
+            }
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById("adminDashboardModal").classList.add("hidden");
+        }
+
+        function showAdminDashboard() {
+            document.getElementById("adminDashboardModal").classList.remove("hidden");
+            renderDashboard();
+            if (!localStorage.getItem("firebase_api_key")) {
+                openApiKeyModal();
+            }
+        }
+
+        // ============================================
+        // MODAL DE CONFIGURACIÓN DE API KEY
+        // ============================================
+        function openApiKeyModal() {
+            document.getElementById("apiKeyModal").classList.remove("hidden");
+            var saved = localStorage.getItem("firebase_api_key");
+            if (saved) document.getElementById("apiKeyInput").value = saved;
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById("apiKeyModal").classList.add("hidden");
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById("apiKeyInput").value.trim();
+            if (key) {
+                localStorage.setItem("firebase_api_key", key);
+                showToast("API Key guardada. Recargando...");
+                setTimeout(function() { location.reload(); }, 1000);
+            } else {
+                showToast("Ingresa un API Key válido.");
+            }
+        }
+
+        // ============================================
+        // DASHBOARD RENDER
+        // ============================================
+        var guestsList = [];
+
         function renderDashboard() {
-            const tableBody = document.getElementById("adminTableBody");
+            var tableBody = document.getElementById("adminTableBody");
             tableBody.innerHTML = "";
 
-            let totalGuests = 0;
-            let fridayCount = 0;
-            let saturdayCount = 0;
-            let sundayCount = 0;
+            var totalGuests = 0;
+            var fridayCount = 0;
+            var saturdayCount = 0;
+            var sundayCount = 0;
 
-            const sortedGuests = [...guestsList].sort((a, b) => a.name.localeCompare(b.name));
+            var sortedGuests = guestsList.slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
 
-            sortedGuests.forEach(item => {
-                const totalParty = 1 + parseInt(item.companions);
+            sortedGuests.forEach(function(item) {
+                var totalParty = 1 + parseInt(item.companions);
                 totalGuests += totalParty;
 
                 if (item.fri === 'si') fridayCount += totalParty;
                 if (item.sat === 'si') saturdayCount += totalParty;
                 if (item.sun === 'si') sundayCount += totalParty;
 
-                const tr = document.createElement("tr");
+                var tr = document.createElement("tr");
                 tr.className = "hover:bg-gray-50 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-4 font-semibold text-gray-900">${item.name}</td>
-                    <td class="p-4 text-center font-medium">${item.companions}</td>
-                    <td class="p-4 text-center">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.fri === 'si' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-                            ${item.fri === 'si' ? 'SÍ' : 'NO'}
-                        </span>
-                    </td>
-                    <td class="p-4 text-center">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.sat === 'si' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">
-                            ${item.sat === 'si' ? 'SÍ' : 'NO'}
-                        </span>
-                    </td>
-                    <td class="p-4 text-center">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.sun === 'si' ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800'}">
-                            ${item.sun === 'si' ? 'SÍ' : 'NO'}
-                        </span>
-                    </td>
-                    <td class="p-4 text-xs text-gray-600 max-w-xs truncate" title="${item.notes}">${item.notes}</td>
-                    <td class="p-4 text-center">
-                        <button onclick="deleteGuestRecord('${item.id}')" class="text-red-600 hover:text-red-900" title="Eliminar de la lista">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                `;
+                tr.innerHTML =
+                    '<td class="p-4 font-semibold text-gray-900">' + escapeHtml(item.name) + '</td>' +
+                    '<td class="p-4 text-center font-medium">' + item.companions + '</td>' +
+                    '<td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ' + (item.fri === 'si' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800') + '">' + (item.fri === 'si' ? 'SI' : 'NO') + '</span></td>' +
+                    '<td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ' + (item.sat === 'si' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') + '">' + (item.sat === 'si' ? 'SI' : 'NO') + '</span></td>' +
+                    '<td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ' + (item.sun === 'si' ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800') + '">' + (item.sun === 'si' ? 'SI' : 'NO') + '</span></td>' +
+                    '<td class="p-4 text-xs text-gray-600 max-w-xs truncate">' + escapeHtml(item.notes) + '</td>' +
+                    '<td class="p-4 text-center"><button onclick="deleteGuestRecord(\'' + item.id + '\')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash-alt"></i></button></td>';
                 tableBody.appendChild(tr);
             });
 
@@ -753,59 +676,155 @@
             document.getElementById("statSun").innerText = sundayCount;
         }
 
-        window.deleteGuestRecord = async function(id) {
-            if (!firebaseReady || !db) {
-                showToast("Base de datos no disponible.");
-                return;
-            }
-            const confirmAction = confirm("¿Estás seguro de que deseas eliminar este registro de confirmación de forma permanente?");
-            if (confirmAction) {
-                try {
-                    const appIdVal = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
-                    const docToDel = doc(db, 'artifacts', appIdVal, 'public', 'data', 'confirmaciones', id);
-                    await deleteDoc(docToDel);
-                    showToast("Registro eliminado con éxito.");
-                } catch (error) {
-                    console.error("Error al eliminar documento:", error);
-                    showToast("No se pudo eliminar el registro. Inténtalo más tarde.");
-                }
-            }
-        };
+        function escapeHtml(text) {
+            var div = document.createElement("div");
+            div.appendChild(document.createTextNode(text || ""));
+            return div.innerHTML;
+        }
 
-        // Exportar a Excel (CSV)
-        window.exportToCSV = function() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nombre de Invitado,Acompanantes,Asiste Viernes,Asiste Sabado,Asiste Domingo,Notas\n";
-            
-            guestsList.forEach(item => {
-                const name = item.name.replace(/,/g, " ");
-                const notes = item.notes.replace(/,/g, " ");
-                csvContent += `${name},${item.companions},${item.fri.toUpperCase()},${item.sat.toUpperCase()},${item.sun.toUpperCase()},${notes}\n`;
+        function exportToCSV() {
+            var csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nombre,Acompanantes,Viernes,Sabado,Domingo,Notas\n";
+            guestsList.forEach(function(item) {
+                var name = (item.name || "").replace(/,/g, " ");
+                var notes = (item.notes || "").replace(/,/g, " ");
+                csvContent += name + "," + item.companions + "," + item.fri.toUpperCase() + "," + item.sat.toUpperCase() + "," + item.sun.toUpperCase() + "," + notes + "\n";
             });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodeURI(csvContent));
             link.setAttribute("download", "Asistencia_Boda_Mariela_y_Jesus.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast("Descargando reporte de asistencia...");
-        };
+            showToast("Descargando reporte...");
+        }
 
-        // Resetear Formulario
-        window.resetForm = function() {
-            rsvpForm.reset();
-            rsvpForm.classList.remove("hidden");
-            thankYouMsg.classList.add("hidden");
-        };
+        function resetForm() {
+            document.getElementById("rsvpForm").reset();
+            document.getElementById("rsvpForm").classList.remove("hidden");
+            document.getElementById("thankYouMsg").classList.add("hidden");
+        }
 
-        // Permitir entrar con "Enter" en el campo contraseña
+        function deleteGuestRecord(id) {
+            showToast("Función disponible cuando Firebase esté conectado.");
+        }
+
+        // Enter en campo contraseña
         document.getElementById("adminPassword").addEventListener("keyup", function(event) {
-            if (event.key === "Enter") {
-                window.verifyAdminPassword();
-            }
+            if (event.key === "Enter") verifyAdminPassword();
         });
+    </script>
+
+    <!-- FIREBASE (módulo separado - si falla no rompe la UI) -->
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot } from "firebase/firestore";
+
+        const savedApiKey = localStorage.getItem("firebase_api_key") || "";
+
+        const firebaseConfig = {
+            apiKey: savedApiKey,
+            authDomain: "wedding-mariela-jesus.firebaseapp.com",
+            projectId: "wedding-mariela-jesus",
+            storageBucket: "wedding-mariela-jesus.appspot.com",
+            messagingSenderId: "303259823522",
+            appId: "1:303259823522:web:75734273dfec8cf2df1203"
+        };
+
+        if (!savedApiKey) {
+            console.warn("Firebase API key no configurada. Usa el panel de admin para configurarla.");
+        } else {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
+                const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'confirmaciones');
+
+                await signInAnonymously(auth);
+
+                onAuthStateChanged(auth, function(user) {
+                    if (user) {
+                        onSnapshot(collectionRef, function(snapshot) {
+                            window.guestsList = [];
+                            snapshot.forEach(function(d) {
+                                window.guestsList.push({ id: d.id, ...d.data() });
+                            });
+                            guestsList = window.guestsList;
+                            if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
+                                renderDashboard();
+                            }
+                        });
+                    }
+                });
+
+                // Override deleteGuestRecord con versión funcional
+                window.deleteGuestRecord = async function(id) {
+                    if (!confirm("¿Eliminar este registro permanentemente?")) return;
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'confirmaciones', id));
+                        showToast("Registro eliminado.");
+                    } catch (e) {
+                        showToast("Error al eliminar.");
+                    }
+                };
+
+                // RSVP form submit
+                document.getElementById("rsvpForm").addEventListener("submit", async function(event) {
+                    event.preventDefault();
+                    var submitBtn = document.getElementById("submitBtn");
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> <span>Registrando...</span>';
+
+                    var guestName = document.getElementById("guestName").value;
+                    var attendFri = document.querySelector('input[name="attendanceFri"]:checked').value;
+                    var attendSat = document.querySelector('input[name="attendanceSat"]:checked').value;
+                    var attendSun = document.querySelector('input[name="attendanceSun"]:checked').value;
+                    var companionsVal = parseInt(document.getElementById("companions").value) || 0;
+                    var notes = document.getElementById("notes").value;
+
+                    try {
+                        await addDoc(collectionRef, {
+                            name: guestName,
+                            fri: attendFri,
+                            sat: attendSat,
+                            sun: attendSun,
+                            companions: companionsVal,
+                            notes: notes || "Ninguna",
+                            timestamp: new Date().toISOString()
+                        });
+
+                        var planList = [];
+                        if (attendFri === 'si') planList.push("Boda y Taquiza (Viernes)");
+                        if (attendSat === 'si') planList.push("Piscinada (Sabado)");
+                        if (attendSun === 'si') planList.push("Paseo Familiar (Domingo)");
+
+                        var total = 1 + companionsVal;
+                        var msg = '¡Gracias, <strong>' + escapeHtml(guestName) + '</strong>! Registramos <strong>' + total + ' asistente(s)</strong>.<br><br>';
+                        if (planList.length > 0) {
+                            msg += 'Confirmaste: <strong>' + planList.join(", ") + '</strong>.';
+                        } else {
+                            msg += "Lamentamos que no puedas acompañarnos.";
+                        }
+
+                        document.getElementById("rsvpForm").classList.add("hidden");
+                        document.getElementById("thankYouMsg").classList.remove("hidden");
+                        document.getElementById("thankYouDetails").innerHTML = msg;
+                    } catch (e) {
+                        console.error("Error RSVP:", e);
+                        showToast("Error de conexion. Intenta de nuevo.");
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<span>Confirmar mi Asistencia</span>';
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error al inicializar Firebase:", error);
+                showToast("Error de Firebase. Verifica tu API Key.");
+            }
+        }
     </script>
 </body>
 </html>

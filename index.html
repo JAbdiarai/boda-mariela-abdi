@@ -636,7 +636,7 @@
         // ============================================
         // DASHBOARD RENDER
         // ============================================
-        var guestsList = [];
+        window.guestsList = [];
 
         function renderDashboard() {
             var tableBody = document.getElementById("adminTableBody");
@@ -647,7 +647,7 @@
             var saturdayCount = 0;
             var sundayCount = 0;
 
-            var sortedGuests = guestsList.slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
+            var sortedGuests = (window.guestsList || []).slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
 
             sortedGuests.forEach(function(item) {
                 var totalParty = 1 + parseInt(item.companions);
@@ -685,7 +685,7 @@
         function exportToCSV() {
             var csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Nombre,Acompanantes,Viernes,Sabado,Domingo,Notas\n";
-            guestsList.forEach(function(item) {
+            (window.guestsList || []).forEach(function(item) {
                 var name = (item.name || "").replace(/,/g, " ");
                 var notes = (item.notes || "").replace(/,/g, " ");
                 csvContent += name + "," + item.companions + "," + item.fri.toUpperCase() + "," + item.sat.toUpperCase() + "," + item.sun.toUpperCase() + "," + notes + "\n";
@@ -743,8 +743,6 @@
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'mariela-y-jesus-2027';
                 const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'confirmaciones');
 
-                await signInAnonymously(auth);
-
                 onAuthStateChanged(auth, function(user) {
                     if (user) {
                         onSnapshot(collectionRef, function(snapshot) {
@@ -752,13 +750,14 @@
                             snapshot.forEach(function(d) {
                                 window.guestsList.push({ id: d.id, ...d.data() });
                             });
-                            guestsList = window.guestsList;
                             if (!document.getElementById("adminDashboardModal").classList.contains("hidden")) {
                                 renderDashboard();
                             }
                         });
                     }
                 });
+
+                await signInAnonymously(auth);
 
                 // Override deleteGuestRecord con versión funcional
                 window.deleteGuestRecord = async function(id) {

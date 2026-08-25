@@ -185,7 +185,7 @@
 
     <!-- BIENVENIDA & CUENTA REGRESIVA -->
     <section class="py-20 px-4 max-w-4xl mx-auto text-center relative overflow-hidden fade-in-section">
-        <div class="absolute -left-10 -top-10 w-40 h-40 leaf-decor bg-[url('https://images.unsplash.com/photo-1501973900372-b5df481971d8?auto=format&fit=crop&w=300')] bg-contain bg-no-repeat rounded-f[...]" ></div>
+        <div class="absolute -left-10 -top-10 w-40 h-40 leaf-decor bg-[url('https://images.unsplash.com/photo-1501973900372-b5df481971d8?auto=format&fit=crop&w=300')] bg-contain bg-no-repeat rounded-full"></div>
         
         <h2 class="font-serif text-3xl md:text-4xl text-emerald-900 mb-6">Faltan sólo</h2>
         
@@ -244,7 +244,7 @@
                             Nuestra unión ante Dios se llevará a cabo en la hermosa e histórica <strong>Iglesia de la Tercera Orden</strong>, ubicada en la mágica ciudad de Mérida, Yucatán.
                         </p>
                         <div class="flex flex-wrap gap-3">
-                            <a href="https://maps.google.com/?q=Iglesia+de+la+Tercera+Orden+Merida+Yucatan" target="_blank" class="inline-flex items-center gap-2 bg-white text-emerald-950 font-semibold px-3 py-2 rounded-xl shadow-sm text-sm">
+                            <a href="https://maps.google.com/?q=Iglesia+de+la+Tercera+Orden+Merida+Yucatan" target="_blank" class="inline-flex items-center gap-2 bg-white text-emerald-950 font-semibold px-4 py-2 rounded-lg hover:bg-emerald-50 transition-colors text-sm">
                                 <i class="fas fa-map-marker-alt"></i> Ver Mapa de la Iglesia
                             </a>
                         </div>
@@ -281,7 +281,7 @@
                     <h3 class="font-serif text-2xl font-bold text-emerald-950 mb-2">Su Presencia</h3>
                     <p class="text-sm text-emerald-800 font-semibold mb-4">¡Nuestra mayor alegría!</p>
                     <p class="text-gray-600 text-sm leading-relaxed">
-                        Para nosotros, el regalo más grande es poder compartir este día tan importante a su lado. Todos son sumamente bienvenidos; saber que contamos con su valiosa presencia, amor y apoyo es lo que más nos importa.
+                        Para nosotros, el regalo más grande es poder compartir este día tan importante a su lado. Todos son sumamente bienvenidos; saber que contamos con su valiosa presencia, amor y apoyo es lo que realmente nos llena de alegría.
                     </p>
                 </div>
             </div>
@@ -301,7 +301,7 @@
             <form id="rsvpForm" class="space-y-6">
                 <div>
                     <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">Nombre Completo del Invitado Principal</label>
-                    <input type="text" id="guestName" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Ej: Juan Pérez">
+                    <input type="text" id="guestName" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Tu nombre completo">
                 </div>
 
                 <!-- CONFIRMACIÓN VIERNES -->
@@ -318,34 +318,6 @@
                     </div>
                 </div>
 
-                <!-- CONFIRMACIÓN SÁBADO -->
-                <div>
-                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">¿Asistirá el Sábado 20?</label>
-                    <p class="text-xs text-gray-500 mb-2">(Día de Piscinada &amp; Convivencia)</p>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
-                            <input type="radio" name="attendanceSat" value="si" required class="text-emerald-700 focus:ring-emerald-700"> ¡Sí, asistiré!
-                        </label>
-                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
-                            <input type="radio" name="attendanceSat" value="no" class="text-emerald-700 focus:ring-emerald-700"> No podré ir
-                        </label>
-                    </div>
-                </div>
-
-                <!-- CONFIRMACIÓN DOMINGO -->
-                <div>
-                    <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">¿Te sumas al viaje del Domingo 21?</label>
-                    <p class="text-xs text-gray-500 mb-2">(Paseo Familiar a Chichén Itzá, Valladolid y Cenote)</p>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
-                            <input type="radio" name="attendanceSun" value="si" required class="text-emerald-700 focus:ring-emerald-700"> Sí, me uno
-                        </label>
-                        <label class="cursor-pointer border border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 text-sm bg-white hover:border-emerald-600 transition-all">
-                            <input type="radio" name="attendanceSun" value="no" class="text-emerald-700 focus:ring-emerald-700"> No podré ir
-                        </label>
-                    </div>
-                </div>
-
                 <!-- NÚMERO DE ACOMPAÑANTES -->
                 <div>
                     <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">Número de acompañantes (adicionales a ti)</label>
@@ -355,10 +327,10 @@
 
                 <div>
                     <label class="block text-xs uppercase tracking-wider font-semibold text-gray-700 mb-2">¿Alguna nota extra o restricción alimentaria?</label>
-                    <textarea id="notes" rows="3" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Ej: Mejor sin gluten, alérgico a frutos secos"></textarea>
+                    <textarea id="notes" rows="3" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Ej: Soy vegetariano, tengo alergia a..."></textarea>
                 </div>
 
-                <button id="submitBtn" type="submit" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-4 rounded-xl transition-colors shadow-md flex items-center justify-center gap-3">
+                <button id="submitBtn" type="submit" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-4 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
                     <span>Confirmar mi Asistencia</span>
                 </button>
             </form>
@@ -405,7 +377,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-2">Contraseña</label>
-                    <input type="password" id="adminPassword" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Ingrese la clave">
+                    <input type="password" id="adminPassword" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700" placeholder="Ingresa la contraseña">
                 </div>
                 <p id="authError" class="text-red-600 text-xs hidden">Clave incorrecta. Inténtalo de nuevo.</p>
                 <button onclick="verifyAdminPassword()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 rounded-xl transition-all">
@@ -440,7 +412,7 @@
 
             <div class="p-6 md:p-8 space-y-8">
                 <!-- TARJETAS DE MÉTRICAS -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
                     <div class="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl">
                         <span class="text-xs uppercase font-bold text-emerald-800 tracking-wider">Total Confirmados</span>
                         <h3 id="statTotal" class="font-serif text-4xl font-bold text-emerald-950 mt-2">0</h3>
@@ -449,17 +421,7 @@
                     <div class="bg-blue-50 border border-blue-100 p-6 rounded-2xl">
                         <span class="text-xs uppercase font-bold text-blue-800 tracking-wider">Asistencia Viernes 19</span>
                         <h3 id="statFri" class="font-serif text-4xl font-bold text-blue-950 mt-2">0</h3>
-                        <p class="text-xs text-blue-700 mt-1">Boda religiosa &amp; Taquiza</p>
-                    </div>
-                    <div class="bg-amber-50 border border-amber-100 p-6 rounded-2xl">
-                        <span class="text-xs uppercase font-bold text-amber-800 tracking-wider">Asistencia Sábado 20</span>
-                        <h3 id="statSat" class="font-serif text-4xl font-bold text-amber-950 mt-2">0</h3>
-                        <p class="text-xs text-amber-700 mt-1">Día de Piscinada</p>
-                    </div>
-                    <div class="bg-purple-50 border border-purple-100 p-6 rounded-2xl">
-                        <span class="text-xs uppercase font-bold text-purple-800 tracking-wider">Asistencia Domingo 21</span>
-                        <h3 id="statSun" class="font-serif text-4xl font-bold text-purple-950 mt-2">0</h3>
-                        <p class="text-xs text-purple-700 mt-1">Viaje Chichén/Valladolid</p>
+                        <p class="text-xs text-blue-700 mt-1">Boda religiosa</p>
                     </div>
                 </div>
 
@@ -476,8 +438,6 @@
                                     <th class="p-4">Nombre del Invitado</th>
                                     <th class="p-4 text-center">Acompañantes</th>
                                     <th class="p-4 text-center">Viernes 19 (Boda)</th>
-                                    <th class="p-4 text-center">Sábado 20 (Alberca)</th>
-                                    <th class="p-4 text-center">Domingo 21 (Tour)</th>
                                     <th class="p-4">Notas/Restricciones</th>
                                     <th class="p-4 text-center">Acción</th>
                                 </tr>
@@ -520,7 +480,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs uppercase tracking-wider font-semibold text-gray-500 mb-2">API Key</label>
-                    <input type="text" id="apiKeyInput" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono" placeholder="Api Key">
+                    <input type="text" id="apiKeyInput" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono" placeholder="AIza...">
                 </div>
                 <button onclick="saveApiKey()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl transition-all">
                     Guardar y Conectar
@@ -531,7 +491,7 @@
     </div>
 
     <!-- NOTIFICACIÓN DE MENSAJE -->
-    <div id="toastNotification" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm shadow-lg z-50 opacity-0 pointer-events-none transition-all">
+    <div id="toastNotification" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full text-sm shadow-lg z-50 opacity-0 pointer-events-none transition-all duration-300">
         <!-- Texto inyectado -->
     </div>
 
@@ -732,8 +692,6 @@
 
             var totalGuests = 0;
             var fridayCount = 0;
-            var saturdayCount = 0;
-            var sundayCount = 0;
 
             var sortedGuests = (window.guestsList || []).slice().sort(function(a, b) { return a.name.localeCompare(b.name); });
 
@@ -742,17 +700,13 @@
                 totalGuests += totalParty;
 
                 if (item.fri === 'si') fridayCount += totalParty;
-                if (item.sat === 'si') saturdayCount += totalParty;
-                if (item.sun === 'si') sundayCount += totalParty;
 
                 var tr = document.createElement("tr");
                 tr.className = "hover:bg-gray-50 transition-colors";
                 tr.innerHTML =
                     '<td class="p-4 font-semibold text-gray-900">' + escapeHtml(item.name) + '</td>' +
                     '<td class="p-4 text-center font-medium">' + item.companions + '</td>' +
-                    '<td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ' + (item.fri === 'si' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800') + '">' + (item.fri === 'si' ? 'Sí' : 'No') + '</span></td>' +
-                    '<td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ' + (item.sat === 'si' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') + '">' + (item.sat === 'si' ? 'Sí' : 'No') + '</span></td>' +
-                    '<td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ' + (item.sun === 'si' ? 'bg-purple-100 text-purple-800' : 'bg-red-100 text-red-800') + '">' + (item.sun === 'si' ? 'Sí' : 'No') + '</span></td>' +
+                    '<td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ' + (item.fri === 'si' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800') + '">' + (item.fri === 'si' ? 'SÍ' : 'NO') + '</span></td>' +
                     '<td class="p-4 text-xs text-gray-600 max-w-xs truncate">' + escapeHtml(item.notes) + '</td>' +
                     '<td class="p-4 text-center"><button onclick="deleteGuestRecord(\'' + item.id + '\')" class="text-red-600 hover:text-red-900" title="Eliminar"><i class="fas fa-trash-alt"></i></button></td>';
                 tableBody.appendChild(tr);
@@ -760,8 +714,6 @@
 
             document.getElementById("statTotal").innerText = totalGuests;
             document.getElementById("statFri").innerText = fridayCount;
-            document.getElementById("statSat").innerText = saturdayCount;
-            document.getElementById("statSun").innerText = sundayCount;
         }
 
         function escapeHtml(text) {
@@ -772,11 +724,11 @@
 
         function exportToCSV() {
             var csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Nombre,Acompanantes,Viernes,Sabado,Domingo,Notas\n";
+            csvContent += "Nombre,Acompanantes,Viernes,Notas\n";
             (window.guestsList || []).forEach(function(item) {
                 var name = (item.name || "").replace(/,/g, " ");
                 var notes = (item.notes || "").replace(/,/g, " ");
-                csvContent += name + "," + item.companions + "," + item.fri.toUpperCase() + "," + item.sat.toUpperCase() + "," + item.sun.toUpperCase() + "," + notes + "\n";
+                csvContent += name + "," + item.companions + "," + item.fri.toUpperCase() + "," + notes + "\n";
             });
             var link = document.createElement("a");
             link.setAttribute("href", encodeURI(csvContent));
@@ -867,8 +819,6 @@
 
                     var guestName = document.getElementById("guestName").value;
                     var attendFri = document.querySelector('input[name="attendanceFri"]:checked').value;
-                    var attendSat = document.querySelector('input[name="attendanceSat"]:checked').value;
-                    var attendSun = document.querySelector('input[name="attendanceSun"]:checked').value;
                     var companionsVal = parseInt(document.getElementById("companions").value) || 0;
                     var notes = document.getElementById("notes").value;
 
@@ -876,22 +826,15 @@
                         await addDoc(collectionRef, {
                             name: guestName,
                             fri: attendFri,
-                            sat: attendSat,
-                            sun: attendSun,
                             companions: companionsVal,
                             notes: notes || "Ninguna",
                             timestamp: new Date().toISOString()
                         });
 
-                        var planList = [];
-                        if (attendFri === 'si') planList.push("Boda (Viernes)");
-                        if (attendSat === 'si') planList.push("Piscinada (Sabado)");
-                        if (attendSun === 'si') planList.push("Paseo Familiar (Domingo)");
-
                         var total = 1 + companionsVal;
                         var msg = '¡Gracias, <strong>' + escapeHtml(guestName) + '</strong>! Registramos <strong>' + total + ' asistente(s)</strong>.<br><br>';
-                        if (planList.length > 0) {
-                            msg += 'Confirmaste: <strong>' + planList.join(", ") + '</strong>.';
+                        if (attendFri === 'si') {
+                            msg += 'Confirmaste tu asistencia a la Boda Religiosa.';
                         } else {
                             msg += "Lamentamos que no puedas acompañarnos.";
                         }
